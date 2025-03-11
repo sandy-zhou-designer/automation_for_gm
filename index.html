@@ -1,107 +1,385 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>Newsletter Maker</title>
-	
+  <head>
+    <meta charset="UTF-8" />
+    <title>Newsletter Maker</title>
 
+    <link
+      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
 
+    <style>
+      .maker {
+        position: relative;
+        width: calc(40% - 4rem);
+        display: inline-block;
+        vertical-align: top;
+        margin-right: 4rem;
+        padding-right: 20px;
+        height: 97.5vh;
+        overflow-y: auto;
+      }
+      .maker textarea {
+        width: 100%;
+      }
+      h4 {
+        margin-bottom: 4px;
+      }
+      input[type="checkbox"] {
+        width: auto;
+      }
+      section {
+        display: none;
+      }
 
+      section.active {
+        display: block !important;
+      }
 
-	<style>
-		.maker {position:relative;width:calc(40% - 4rem);display:inline-block;vertical-align: top;margin-right:4rem;}
-		.maker textarea {width:100%;}
-		h4{margin-bottom:4px}
-		input[type=checkbox] {width: auto;}
-		section {display: none;}
+      input:checked + section {
+        display: block;
+      }
+      .result {
+        width: calc(60% - 4rem);
+        display: inline-block;
+        vertical-align: top;
+      }
+      iframe {
+        height: 97.5vh;
+        min-height: 940px;
+        width: 100%;
+        border: 1px solid #ccc;
+      }
+      @keyframes spin {
+        0% {
+          transform: translate(-50%, -50%) rotateY(0deg) rotateX(45deg);
+        }
+        50% {
+          transform: translate(-50%, -50%) rotateY(180deg) rotateX(57deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotateY(359deg) rotateX(45deg);
+        }
+      }
 
-		section.active{display: block!important}
-		
-		input:checked + section {display: block;}
-		.result {width:calc(60% - 4rem);display:inline-block;vertical-align: top;}
-		iframe {height:100vh; min-height: 940px; width:100%;border:1px solid #ccc;}
-		@keyframes spin {
-		  0% { transform: translate(-50%, -50%) rotateY(0deg) rotateX(45deg); }
-		  50% { transform: translate(-50%, -50%) rotateY(180deg) rotateX(57deg); }
-		  100% { transform: translate(-50%, -50%) rotateY(359deg) rotateX(45deg); }
-		}
+      .spacer {
+        height: 30px;
+      }
+      .spinner {
+        display: none;
+        position: absolute;
+        border: 2px solid rgba(0, 53, 255, 0.74);
+        top: 4rem;
+        left: 50%;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        opacity: 0.9;
+        transform-style: preserve-3d;
+        animation: spin 1s linear infinite;
+      }
+      .spinner.wait {
+        display: block;
+      }
+      .mb5 {
+        margin-bottom: 5px;
+        margin-top: 20px;
+        font-family: Arial, Sans-serif;
+      }
+      .greyout {
+        opacity: 0.5;
+        user-select: none;
+      }
+      input {
+        margin-bottom: 5px;
+      }
+      .small-tag {
+        font-family: Arial, Sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 125%;
+        letter-spacing: -0.14px;
+        text-transform: uppercase;
+        text-transform: uppercase;
+        color: #ba0000;
+        margin-top: 5px;
+      }
+      .hide {
+        display: none;
+      }
+      label.mdc-text-field {
+        height: 40px;
+      }
+      .ff__number{
+        position:absolute;
+        padding: 3px 6px;
+        background-color: #665fe8;
+        color: #fff;
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-weight: 700;
+        top: 0px;
+        right: 0;
+      }
+      .ff__number_f{
+        position:absolute;
+        padding: 3px 6px;
+        background-color: #308d3e;
+        color: #fff;
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-weight: 700;
+        top: 0px;
+        right: 0;
+        border-bottom-left-radius: 50%;
+      }
+      /* Define your theme colors */
+      :root {
+        /* --mdc-theme-primary: #3285a4; Custom primary color */
+        --md-sys-color-on-primary: #ffffff; /* Color for text on primary buttons */
+        --md-sys-color-secondary: #03dac6; /* Custom secondary color */
+        --md-sys-color-on-secondary: #000000; /* Color for text on secondary buttons */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="maker">
+      <div class="spinner"></div>
+      <textarea id="result" cols="30" rows="10"></textarea>
+      <form>
+        <!-- <button id="submit">Make!</button> -->
+        <button class="mdc-button mdc-button--raised foo-button" id="submit">
+          <div class="mdc-button__ripple"></div>
+          <i class="material-icons mdc-button__icon" aria-hidden="true">edit</i>
+          <span class="mdc-button__label">Make!</span>
+        </button>
+        <br /><br />
 
-		.spacer{height:30px}
-		.spinner {
-			display:none;
-			position: absolute;
-			border: 2px solid rgba(0, 53, 255, 0.74);
-			top: 4rem;
-			left: 50%;
-			border-radius: 50%;
-			width: 40px;
-			height: 40px;
-			opacity: 0.9;
-			transform-style: preserve-3d;
-			animation: spin 1s linear infinite;
-		}
-		.spinner.wait {display:block;}
-		.mb5{margin-bottom:5px;margin-top:20px;font-family:Arial,Sans-serif;}
-		.greyout{opacity:0.5;user-select: none}
-		input{margin-bottom:5px;}
-		.small-tag{font-family:Arial,Sans-serif;font-size: 12px;font-weight: 500;line-height: 125%; letter-spacing: -0.14px;text-transform: uppercase;text-transform:uppercase;color: #BA0000;margin-top:5px}
-		.hide{display:none}
-	</style>
-	
+        <div class="newsletter-topic">
+          <h4>Newsletter Template</h4>
+          <label for="7days"
+            ><input
+              checked
+              type="radio"
+              id="sevenDays"
+              name="newsletter"
+              value="sevenDays"
+            />7 Days Trending</label
+          >
+          <label for="epochtv"
+            ><input
+              type="radio"
+              id="epochTV"
+              name="newsletter"
+              value="epochTv"
+            />Epoch TV</label
+          ><br />
+          <label for="morningbrief"
+            ><input
+              type="radio"
+              id="morningbrief"
+              name="newsletter"
+              value="morningbrief"
+            />Morning Brief</label
+          ><br />
+          <!-- <label for="weekendbrief"><input type="radio" id="weekendbrief" name="newsletter" value="weekendbrief">Morning Brief Weekend</label> -->
+          <label for="oldbrief" style="display: none"
+            ><input
+              type="radio"
+              id="oldbrief"
+              name="newsletter"
+              value="weekendbrief"
+            />Old Brief</label
+          >
+          <!--add by alan focus and top story-->
+          <label for="focus"
+            ><input
+              type="radio"
+              id="focus"
+              name="newsletter"
+              value="focus"
+            />Focus</label
+          >
+          <label for="topStoryAlert"
+            ><input
+              type="radio"
+              id="topStoryAlert"
+              name="newsletter"
+              value="topStoryAlert"
+            />Top Story Alert</label
+          >
+        </div>
 
-</head>
-<body>
-	<div class="maker">
-		<div class="spinner"></div>
-		<textarea id="result" cols="30" rows="10"></textarea>
-		<form>
-			<button id="submit">Make!</button><br><br>
+        <div id="layout">
+          <h4>Weekday or Weekend</h4>
+          <label for="layoutA"
+            ><input
+              checked
+              type="radio"
+              id="layoutA"
+              name="abTesting"
+              value="layoutA"
+            />Weekdays</label
+          >
+          <label for="layoutB"
+            ><input
+              type="radio"
+              id="layoutB"
+              name="abTesting"
+              value="layoutB"
+            />Weekend</label
+          >
+        </div>
 
+        <div id="userType">
+          <h4>User Type</h4>
+          <label for="paid"
+            ><input
+              checked
+              type="radio"
+              id="paid"
+              name="userType"
+              value="paid"
+            />Paid</label
+          >
+          <label for="free"
+            ><input
+              type="radio"
+              id="free"
+              name="userType"
+              value="free"
+            />Free</label
+          >
+          <label for="cancel"
+            ><input
+              type="radio"
+              id="cancel"
+              name="userType"
+              value="cancel"
+            />Canceled</label
+          >
+        </div>
 
-			<div class="newsletter-topic">
-				<h4>Newsletter Template</h4>
-				<label for="7days"><input checked type="radio" id="sevenDays" name="newsletter" value="sevenDays">7 Days Trending</label>
-				<label for="epochtv"><input type="radio" id="epochTV" name="newsletter" value="epochTv">Epoch TV</label><br>
-				<label for="morningbrief"><input type="radio" id="morningbrief" name="newsletter" value="morningbrief">Morning Brief</label>
-				<!-- <label for="weekendbrief"><input type="radio" id="weekendbrief" name="newsletter" value="weekendbrief">Morning Brief Weekend</label> -->
-				<label for="oldbrief"><input type="radio" id="oldbrief" name="newsletter" value="weekendbrief">Old Brief</label>
+        <div class="spacer"></div>
 
-			</div>
+        <label for="promo-check">Include CTA?</label>
+        <!-- <div class="mdc-touch-target-wrapper">
+          <div class="mdc-checkbox mdc-checkbox--touch">
+            <input
+              type="checkbox"
+              class="mdc-checkbox__native-control"
+              name="promo-check" id="promo-check"
+            />
+            <div class="mdc-checkbox__background">
+              <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                <path
+                  class="mdc-checkbox__checkmark-path"
+                  fill="none"
+                  d="M1.73,12.91 8.1,19.28 22.79,4.59"
+                />
+              </svg>
+              <div class="mdc-checkbox__mixedmark"></div>
+            </div>
+            <div class="mdc-checkbox__ripple"></div>
+          </div>
+        </div> -->
+        <input type="checkbox" name="promo-check" id="promo-check" />
+        <section class="pomo-section">
+          <textarea
+            name="promo-1"
+            rows="8"
+            type="text"
+            placeholder="promo copy"
+          ></textarea>
 
-			
-
-			<div id="layout">
-				<h4>Weekday or Weekend</h4>
-				<label for="layoutA"><input checked type="radio" id="layoutA" name="abTesting" value="layoutA">Weekdays</label>
-				<label for="layoutB"><input  type="radio" id="layoutB" name="abTesting" value="layoutB">Weekend</label>	
-			</div>
-
-			<div id="userType">
-				<h4>User Type</h4>
-					<label for="paid"><input  checked  type="radio" id="paid" name="userType" value="paid">Paid</label>	
-					<label for="free"><input type="radio" id="free" name="userType" value="free">Free</label>
-					<label for="cancel"><input  type="radio" id="cancel" name="userType" value="cancel">Canceled</label>	
-
-			</div>
-
-			<div class="spacer"></div>
-
-			<label for="promo-check">Include CTA?</label>
-			<input type="checkbox" name="promo-check" id="promo-check">
-			<section class="pomo-section">
-				<textarea name="promo-1" rows="8" type="text" placeholder="promo copy"></textarea>
-				
-				<!-- <input name="copy-promo-2" type="text" placeholder="button copy"><br>
+          <!-- <input name="copy-promo-2" type="text" placeholder="button copy"><br>
 				<input name="copy-promo-3" type="text" placeholder="under button copy"><br> -->
-			</section>
+        </section>
 
-			<h4>Info</h4>
-			<input name="copy-title" type="text" placeholder="Your Title" required><br>
-			<input name="copy-preheader" type="text" placeholder="preheader" required><br>
-			<input name="copy-date" type="text" placeholder="date"><br>
-			<textarea name="copy-editor-message" id="editor-message" type="text" placeholder="Editor's Message" rows="4" cols="50" class="hide"></textarea>
+        <h4>Info</h4>
+        <!-- <input
+          name="copy-title"
+          type="text"
+          placeholder="Your Title"
+          required
+        /><br /> -->
+        <label
+          class="mdc-text-field mdc-text-field--outlined mdc-text-label-ff"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch ">
+              <span class="mdc-floating-label mdc-floating-label--float-above" id="my-label-id"
+                >Your Title</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            name="copy-title"
+            type="text"
+            placeholder="Your Title"
+            class="mdc-text-field__input"
+            required
+          />
+        </label>
+        <!-- <input
+          name="copy-preheader"
+          type="text"
+          placeholder="preheader"
+          required
+        /><br /> -->
+        <label
+          class="mdc-text-field mdc-text-field--outlined mdc-text-label-ff"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id">preheader</span>
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            name="copy-preheader"
+            type="text"
+            placeholder="preheader"
+            class="mdc-text-field__input"
+            required
+          />
+        </label>
+        <!-- <input name="copy-date" type="text" placeholder="date" /><br /> -->
+        <label
+          class="mdc-text-field mdc-text-field--outlined"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id">copy-date</span>
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input name="copy-date" type="text" placeholder="date"
+          class="mdc-text-field__input" /> </label
+        ><br />
+        <br />
+        <textarea
+          name="copy-editor-message"
+          id="editor-message"
+          type="text"
+          placeholder="Editor's Message"
+          rows="4"
+          cols="50"
+          class="hide"
+        ></textarea>
 
-			<!-- <h4>Ads</h4>
+        <!-- <h4>Ads</h4>
 			<input name="copy-ad-1" type="text" placeholder="ad position 1"><br>
 			<input name="copy-ad-2" type="text" placeholder="ad position 2"><br>
 			<input name="copy-ad-3" type="text" placeholder="ad position 3"><br>
@@ -109,197 +387,1450 @@
 			<h4>Words of Wisdom</h4>
 			<input name="copy-wisdom_text" type="text" placeholder="words of wisdom"><br>
 			<input name="copy-wisdom_author"  name="a1"type="text" placeholder="words of wisdom author"><br> -->
-			<section class="morningbrief newsletter-ca">
-				<h4>Morning Brief</h4>
+        <section class="morningbrief newsletter-ca">
+          <h4>Morning Brief</h4>
 
-				<p class="mb5">Editor's Highlights</p>
-				<input name="top-news-1" type="url" placeholder="paste article link" alt="highlight-news-1"><br>
-				<textarea name="content-text-1" type="text" placeholder="First artilce text" rows="4" cols="50"></textarea>
-				<input name="highlight-news-1" type="url" placeholder="paste article link" alt="highlight-news-2"><br>
-				<textarea name="content-text-2" type="text" placeholder="Second artilce text" rows="4" cols="50"></textarea>
-				<input name="highlight2-news-1" type="url" placeholder="paste article link" alt="highlight-news-3"><br>
-				<textarea name="content-text-3" type="text" placeholder="Second artilce text" rows="4" cols="50"></textarea>
-				
+          <p class="mb5">Editor's Highlights</p>
+          <input
+            name="top-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="highlight-news-1"
+          /><br />
+          <textarea
+            name="content-text-1"
+            type="text"
+            placeholder="First artilce text"
+            rows="4"
+            cols="50"
+          ></textarea>
+          <input
+            name="highlight-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="highlight-news-2"
+          /><br />
+          <textarea
+            name="content-text-2"
+            type="text"
+            placeholder="Second artilce text"
+            rows="4"
+            cols="50"
+          ></textarea>
+          <input
+            name="highlight2-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="highlight-news-3"
+          /><br />
+          <textarea
+            name="content-text-3"
+            type="text"
+            placeholder="Second artilce text"
+            rows="4"
+            cols="50"
+          ></textarea>
 
-				<p class="mb5">More top stories</p>
-				<input name="article-news-1" type="url" placeholder="paste article link" alt="more-top-news-1"><br>
-				<input name="article-news-2" type="url" placeholder="paste article link" alt="more-top-news-2"><br>
-				<input name="article-news-3" type="url" placeholder="paste article link" alt="more-top-news-3"><br>
-				<input name="article-news-4" type="url" placeholder="paste article link" alt="more-top-news-4"><br>
-				<input name="article-news-5" type="url" placeholder="paste article link" alt="more-top-news-5"><br>
-			
+          <p class="mb5">More top stories</p>
+          <input
+            name="article-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="more-top-news-1"
+          /><br />
+          <input
+            name="article-news-2"
+            type="url"
+            placeholder="paste article link"
+            alt="more-top-news-2"
+          /><br />
+          <input
+            name="article-news-3"
+            type="url"
+            placeholder="paste article link"
+            alt="more-top-news-3"
+          /><br />
+          <input
+            name="article-news-4"
+            type="url"
+            placeholder="paste article link"
+            alt="more-top-news-4"
+          /><br />
+          <input
+            name="article-news-5"
+            type="url"
+            placeholder="paste article link"
+            alt="more-top-news-5"
+          /><br />
 
+          <p class="mb5">List of News</p>
+          <div class="small-tag">More in Canada</div>
+          <input
+            name="list-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="canada-news-1"
+          /><br />
+          <input
+            name="list-news-2"
+            type="url"
+            placeholder="paste article link"
+            alt="canada-news-2"
+          /><br />
+          <input
+            name="list-news-3"
+            type="url"
+            placeholder="paste article link"
+            alt="canada-news-3"
+          /><br />
+          <input
+            name="list-news-4"
+            type="url"
+            placeholder="paste article link"
+            alt="canada-news-4"
+          /><br />
+          <input
+            name="list-news-5"
+            type="url"
+            placeholder="paste article link"
+            alt="canada-news-5"
+          /><br />
 
+          <div class="small-tag">US & International</div>
+          <input
+            name="list-news-6"
+            type="url"
+            placeholder="paste article link"
+            alt="us-news-1"
+          /><br />
+          <input
+            name="list-news-7"
+            type="url"
+            placeholder="paste article link"
+            alt="us-news-2"
+          /><br />
+          <input
+            name="list-news-8"
+            type="url"
+            placeholder="paste article link"
+            alt="us-news-3"
+          /><br />
+          <input
+            name="list-news-9"
+            type="url"
+            placeholder="paste article link"
+            alt="us-news-4"
+          /><br />
 
-				<p class="mb5">List of News</p>
-				<div class="small-tag">More in Canada</div>
-				<input name="list-news-1" type="url" placeholder="paste article link" alt="canada-news-1"><br>
-				<input name="list-news-2" type="url" placeholder="paste article link" alt="canada-news-2"><br>
-				<input name="list-news-3" type="url" placeholder="paste article link" alt="canada-news-3"><br>
-				<input name="list-news-4" type="url" placeholder="paste article link" alt="canada-news-4"><br>
-				<input name="list-news-5" type="url" placeholder="paste article link" alt="canada-news-5"><br>
-			
-
-				<div class="small-tag">US & International</div>
-				<input name="list-news-6" type="url" placeholder="paste article link" alt="us-news-1"><br>
-				<input name="list-news-7" type="url" placeholder="paste article link" alt="us-news-2"><br>
-				<input name="list-news-8" type="url" placeholder="paste article link" alt="us-news-3"><br>
-				<input name="list-news-9" type="url" placeholder="paste article link" alt="us-news-4"><br>
-				
-				
-
-				<!-- <div class="small-tag">Trump Trial</div>
+          <!-- <div class="small-tag">Trump Trial</div>
 				<input name="list-news-10" type="url" placeholder="paste article link" alt="election-news-1"><br>
 				<input name="list-news-11" type="url" placeholder="paste article link" alt="election-news-2"><br>
 				<input name="list-news-12" type="url" placeholder="paste article link" alt="election-news-3"><br> -->
 
-
-				<!-- <div class="small-tag">Health News</div>
+          <!-- <div class="small-tag">Health News</div>
 				<input name="list-news-12" type="url" placeholder="paste article link" alt="healthlist-news-1"><br>
 				<input name="list-news-13" type="url" placeholder="paste article link" alt="healthlist-news-2"><br> -->
-				
 
-				<div class="small-tag">TODAY’S VIDEOS | EPOCH TV</div>
-				<input name="tv-news-1" type="url" placeholder="paste article link" alt="tv-news-1"><br>
-				<input name="tv-news-2" type="url" placeholder="paste article link" alt="tv-news-2"><br>
-				<input name="happy-news-1" type="url" placeholder="paste article link" alt="tv-news-3"><br>
+          <div class="small-tag">TODAY’S VIDEOS | EPOCH TV</div>
+          <input
+            name="tv-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="tv-news-1"
+          /><br />
+          <input
+            name="tv-news-2"
+            type="url"
+            placeholder="paste article link"
+            alt="tv-news-2"
+          /><br />
+          <input
+            name="happy-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="tv-news-3"
+          /><br />
 
-				<p class="mb5">Positive News</p>
-				<input name="article-news-6" type="url" placeholder="paste article link" alt="positive-news-1"><br>
+          <p class="mb5">Positive News</p>
+          <input
+            name="article-news-6"
+            type="url"
+            placeholder="paste article link"
+            alt="positive-news-1"
+          /><br />
 
+          <p class="mb5">Opinion</p>
+          <input
+            name="opinion-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="opinion-news-1"
+          /><br />
+          <input
+            name="opinion-news-2"
+            type="url"
+            placeholder="paste article link"
+            alt="opinion-news-2"
+          /><br />
 
-				<p class="mb5">Opinion</p>
-				<input name="opinion-news-1" type="url" placeholder="paste article link" alt="opinion-news-1"><br>
-				<input name="opinion-news-2" type="url" placeholder="paste article link" alt="opinion-news-2"><br>
-			
-				<p class="mb5">Health & Wellness</p>
-				<input name="article-news-7" type="url" placeholder="paste article link" alt="health-news-1"><br>
-				<input name="article-news-8" type="url" placeholder="paste article link" alt="health-news-2"><br>
+          <p class="mb5">Health & Wellness</p>
+          <input
+            name="article-news-7"
+            type="url"
+            placeholder="paste article link"
+            alt="health-news-1"
+          /><br />
+          <input
+            name="article-news-8"
+            type="url"
+            placeholder="paste article link"
+            alt="health-news-2"
+          /><br />
 
+          <p class="mb5" 0>Life & Ideas</p>
+          <input
+            name="article-news-9"
+            type="url"
+            placeholder="paste article link"
+            alt="life-news-1"
+          /><br />
+          <input
+            name="article-news-10"
+            type="url"
+            placeholder="paste article link"
+            alt="life-news-2"
+          /><br />
 
-				<p class="mb5"0>Life & Ideas</p>
-				<input name="article-news-9" type="url" placeholder="paste article link" alt="life-news-1"><br>
-				<input name="article-news-10" type="url" placeholder="paste article link" alt="life-news-2"><br>
-		
-				<p class="mb5">Daily Recipe</p>
-				<input name="recommends-news-1" type="url" placeholder="paste article link" alt="recipe-news-1" ><br>
+          <p class="mb5">Daily Recipe</p>
+          <input
+            name="recommends-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="recipe-news-1"
+          /><br />
 
+          <div class="small-tag">Words of wisdom</div>
+          <textarea
+            name="copy-word-of-wisdom"
+            type="text"
+            placeholder="Inspiring line goes here"
+            rows="4"
+            cols="50"
+          ></textarea>
+          <input
+            name="copy-wise-person"
+            type="url"
+            placeholder="Who said that"
+          /><br />
+        </section>
 
-				<div class="small-tag">Words of wisdom</div>
-				<textarea name="copy-word-of-wisdom" type="text" placeholder="Inspiring line goes here" rows="4" cols="50"></textarea>
-				<input name="copy-wise-person" type="url" placeholder="Who said that"><br>
+        <section class="epochTV newsletter-ca">
+          <h4>Epoch TV articles</h4>
+          <p class="mb5">Featured</p>
+          <input
+            name="article-news-1"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-2"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <p class="mb5">Talk Shows</p>
+          <input
+            name="article-news-3"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-4"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-5"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <p class="mb5">Documentaries</p>
+          <input
+            name="article-news-6"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-7"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-8"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <p class="mb5" 0>News</p>
+          <input
+            name="article-news-9"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-10"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+        </section>
 
-			</section>
+        <section class="sevenDays newsletter-ca active">
+          <h4>7 Days Trending News Article</h4>
+          <input
+            name="article-news-1"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-2"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-3"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-4"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-5"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-6"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-7"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+          <input
+            name="article-news-8"
+            type="url"
+            placeholder="paste article link"
+          /><br />
+        </section>
 
+        <section class="oldbrief newsletter-ca">
+          <h4>Old Morning Brief</h4>
 
+          <div class="small-tag">Words of wisdom</div>
+          <textarea
+            name="copy-word-of-wisdom"
+            type="text"
+            placeholder="Inspiring line goes here"
+            rows="4"
+            cols="50"
+          ></textarea>
+          <input
+            name="copy-wise-person"
+            type="url"
+            placeholder="Who said that"
+          /><br />
 
-			<section class="epochTV newsletter-ca">
-				<h4>Epoch TV articles</h4>
-				<p class="mb5">Featured</p>
-				<input name="article-news-1" type="url" placeholder="paste article link"><br>
-				<input name="article-news-2" type="url" placeholder="paste article link"><br>
-				<p class="mb5">Talk Shows</p>
-				<input name="article-news-3" type="url" placeholder="paste article link"><br>
-				<input name="article-news-4" type="url" placeholder="paste article link"><br>
-				<input name="article-news-5" type="url" placeholder="paste article link"><br>
-				<p class="mb5">Documentaries</p>
-				<input name="article-news-6" type="url" placeholder="paste article link"><br>
-				<input name="article-news-7" type="url" placeholder="paste article link"><br>
-				<input name="article-news-8" type="url" placeholder="paste article link"><br>
-				<p class="mb5"0>News</p>
-				<input name="article-news-9" type="url" placeholder="paste article link"><br>
-				<input name="article-news-10" type="url" placeholder="paste article link"><br>
-				
-			
-			</section>
+          <p class="mb5">Top News</p>
+          <input
+            name="top-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="1"
+          /><br />
 
+          <p class="mb5">More top stories</p>
+          <input
+            name="article-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="2"
+          /><br />
+          <input
+            name="article-news-2"
+            type="url"
+            placeholder="paste article link"
+            alt="3"
+          /><br />
+          <input
+            name="article-news-3"
+            type="url"
+            placeholder="paste article link"
+            alt="4"
+          /><br />
+          <input
+            name="article-news-4"
+            type="url"
+            placeholder="paste article link"
+            alt="5"
+          /><br />
+          <input
+            name="article-news-5"
+            type="url"
+            placeholder="paste article link"
+            alt="6"
+          /><br />
+          <input
+            name="article-news-6"
+            type="url"
+            placeholder="paste article link"
+            alt="7"
+          /><br />
+          <input
+            name="article-news-7"
+            type="url"
+            placeholder="paste article link"
+            alt="8"
+          /><br />
 
+          <p class="mb5" 0>Positive News</p>
+          <input
+            name="article-news-8"
+            type="url"
+            placeholder="paste article link"
+            alt="9"
+          /><br />
 
-			<section class="sevenDays newsletter-ca active">
-				<h4>7 Days Trending News Article</h4>
-				<input name="article-news-1" type="url" placeholder="paste article link"><br>
-				<input name="article-news-2" type="url" placeholder="paste article link"><br>
-				<input name="article-news-3" type="url" placeholder="paste article link"><br>
-				<input name="article-news-4" type="url" placeholder="paste article link"><br>
-				<input name="article-news-5" type="url" placeholder="paste article link"><br>
-				<input name="article-news-6" type="url" placeholder="paste article link"><br>
-				<input name="article-news-7" type="url" placeholder="paste article link"><br>
-				<input name="article-news-8" type="url" placeholder="paste article link"><br>
-			</section>
+          <p class="mb5">Opinion</p>
+          <input
+            name="opinion-news-1"
+            type="url"
+            placeholder="paste article link"
+            alt="10"
+          /><br />
+          <input
+            name="opinion-news-2"
+            type="url"
+            placeholder="paste article link"
+            alt="11"
+          /><br />
 
-			<section class="oldbrief newsletter-ca ">
-				<h4>Old Morning Brief</h4>
+          <div class="small-tag">EPOCH TV</div>
+          <input
+            name="top-news-2"
+            type="url"
+            placeholder="paste article link"
+            alt="12"
+          /><br />
+          <input
+            name="top-news-3"
+            type="url"
+            placeholder="paste article link"
+            alt="13"
+          /><br />
 
-				<div class="small-tag">Words of wisdom</div>
-				<textarea name="copy-word-of-wisdom" type="text" placeholder="Inspiring line goes here" rows="4" cols="50"></textarea>
-				<input name="copy-wise-person" type="url" placeholder="Who said that"><br>
+          <div class="small-tag">DAILY RECIPE</div>
+          <input
+            name="top-news-4"
+            type="url"
+            placeholder="paste article link"
+            alt="14"
+          /><br />
+        </section>
 
+        <section class="focus newsletter-ca">
+          <h4>Focus</h4>
+          <!-- <p class="mb5">Top Article</p> -->
+          <!-- <input
+            name="fouce-top-article"
+            type="url"
+            placeholder="paste top article link"
+            class="focus-top-article-url"
+            alt="focus_top_article"
+          /><br /> -->
+          <div class="authorNote" style="margin-bottom: 20px; padding-right: 25px;">
+            <textarea
+            id="fouce-editor-note"
+            name="fouce-editor-note"
+            placeholder="Editor Note"
+            class="fouce-editor-note mdc-text-field__input"
+            alt="fouce-editor-note" 
+            rows="5"
+          style="height: fit-content; border: 2px dashed #d87812; padding: 10px;"
+          ></textarea>
+          </div>
+          <div style="display: flex; justify-content: space-between; flex-direction: column; border: 2px dashed #665fe8; padding: 10px; position: relative;">
+            <div class="ff__number">1</div>
+            <div style="width:100%;display: flex; justify-content: space-between; ">
+            <div style="width: 70%;">
+            <label
+              class="mdc-text-field mdc-text-field--outlined"
+              style="margin-top: 24px; width: 100%"
+            >
+              <span class="mdc-notched-outline">
+                <span class="mdc-notched-outline__leading"></span>
+                <span class="mdc-notched-outline__notch">
+                  <span class="mdc-floating-label" id="my-label-id"
+                    >Top Article Link</span
+                  >
+                </span>
+                <span class="mdc-notched-outline__trailing"></span>
+              </span>
+              <input
+                name="fouce-mid-article-1"
+                type="url"
+                placeholder="paste top article link"
+                class="focus-top-article-url focus-mid-article-url mdc-text-field__input"
+                alt="focus_article-1"
+              />
+            </label>
+          </div>
+            <div class="fAlen" style="width: 15%;">
+              <label
+              class="mdc-text-field mdc-text-field--outlined"
+              style="margin-top: 24px; width: 100%"
+            >
+              <span class="mdc-notched-outline">
+                <span class="mdc-notched-outline__leading"></span>
+                <span class="mdc-notched-outline__notch">
+                  <span class="mdc-floating-label" id="my-label-id"
+                    >Length</span
+                  >
+                </span>
+                <span class="mdc-notched-outline__trailing"></span>
+              </span>
+              <input
+                id="f-len-1"
+                name="f-len-1"
+                type="number"
+                value="3"
+                class="mdc-text-field__input"
+              />
+            </label>
+            </div>
+            <div class="fAlen" style="width: 15%; display: flex; align-items: center; padding: 20px 0px 0px 8px; flex-direction: column; font-size: 10px;">
+              <div><input type="checkbox" name="top_article_is_show_img" id="top_article_is_show_img" checked />Image</div>
+              <div><input type="checkbox" name="top_article_is_premium_1" id="top_article_is_premium_1" checked />PREMIUM</div>
+            </div>
 
+            </div>
+            <div style="width:100%">
+              <label
+              class="mdc-text-field mdc-text-field--outlined"
+              style="margin-top: 24px; width: 100%"
+            >
+              <span class="mdc-notched-outline">
+                <span class="mdc-notched-outline__leading"></span>
+                <span class="mdc-notched-outline__notch">
+                  <span class="mdc-floating-label" id="my-label-id"
+                    >Top Article Title</span
+                  >
+                </span>
+                <span class="mdc-notched-outline__trailing"></span>
+              </span>
+              <input
+                id="fouce-mid-article-1-title"
+                name="fouce-mid-article-1-title"
+                type="text"
+                placeholder="fill article title"
+                class="mdc-text-field__input"
+              />
+            </label>
+            </div>
+          </div>
 
-				<p class="mb5">Top News</p>
-				<input name="top-news-1" type="url" placeholder="paste article link" alt="1"><br>
+          <div style="display: flex; justify-content: space-between; flex-direction: column; border: 2px dashed #665fe8; padding: 10px; position: relative;">
+            <div class="ff__number">2</div>
+            <div style="width:100%;display: flex; justify-content: space-between; ">
+            <div style="width: 70%;">
 
-				<p class="mb5">More top stories</p>
-				<input name="article-news-1" type="url" placeholder="paste article link" alt="2"><br>
-				<input name="article-news-2" type="url" placeholder="paste article link" alt="3"><br>
-				<input name="article-news-3" type="url" placeholder="paste article link" alt="4"><br>
-				<input name="article-news-4" type="url" placeholder="paste article link" alt="5"><br>
-				<input name="article-news-5" type="url" placeholder="paste article link" alt="6"><br>
-				<input name="article-news-6" type="url" placeholder="paste article link" alt="7"><br>
-				<input name="article-news-7" type="url" placeholder="paste article link" alt="8"><br>
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >Second Article Link</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="fouce-mid-article-2"
+              type="url"
+              placeholder="paste top article link"
+              class="fouce-second-article-url focus-mid-article-url mdc-text-field__input"
+              alt="fouce_article-2"
+            />
+          </label>
+        </div>
+        <div class="fAlen" style="width: 15%;">
+          <label
+          class="mdc-text-field mdc-text-field--outlined"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id"
+                >Length</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            id="f-len-2"
+            name="f-len-2"
+            type="number"
+            value="3"
+            class="mdc-text-field__input"
+          />
+        </label>
+      </div>
+      <div class="fAlen" style="width: 15%; display: flex; align-items: center; padding: 20px 0px 0px 8px; flex-direction: column; font-size: 10px;">
+        <div style="display: none;"><input type="checkbox" name="top_article_is_show_img" id="top_article_is_show_img" checked />Image</div>
+        <div><input type="checkbox" name="top_article_is_premium_2" id="top_article_is_premium_2" checked />PREMIUM</div>
+      </div>
+    </div>
+    <div style="width:100%">
+      <label
+      class="mdc-text-field mdc-text-field--outlined"
+      style="margin-top: 24px; width: 100%"
+    >
+      <span class="mdc-notched-outline">
+        <span class="mdc-notched-outline__leading"></span>
+        <span class="mdc-notched-outline__notch">
+          <span class="mdc-floating-label" id="my-label-id"
+            >Second Article Title</span
+          >
+        </span>
+        <span class="mdc-notched-outline__trailing"></span>
+      </span>
+      <input
+        id="fouce-mid-article-2-title"
+        name="fouce-mid-article-2-title"
+        type="text"
+        placeholder="fill article title"
+        class="mdc-text-field__input"
+      />
+    </label>
+    </div>
+  </div>
 
-				<p class="mb5"0>Positive News</p>
-				<input name="article-news-8" type="url" placeholder="paste article link" alt="9"><br>
+  <div style="display: flex; justify-content: space-between; flex-direction: column; border: 2px dashed #665fe8; padding: 10px; position: relative;">
+    <div class="ff__number">3</div>
+    <div style="width:100%;display: flex; justify-content: space-between; ">
+    <div style="width: 70%;">
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >Third Article Link</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="fouce-mid-article-3"
+              type="url"
+              placeholder="paste top article link"
+              class="fouce-third-article-url focus-mid-article-url mdc-text-field__input"
+              alt="fouce_article-3"
+            />
+          </label>
+        </div>
+        <div class="fAlen" style="width: 15%;">
+          <label
+          class="mdc-text-field mdc-text-field--outlined"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id"
+                >Length</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            id="f-len-3"
+            name="f-len-3"
+            type="number"
+            value="3"
+            class="mdc-text-field__input"
+          />
+        </label>
+      </div>
+      <div class="fAlen" style="width: 15%; display: flex; align-items: center; padding: 20px 0px 0px 8px; flex-direction: column; font-size: 10px;">
+        <div style="display: none;"><input type="checkbox" name="top_article_is_show_img" id="top_article_is_show_img" checked />Image</div>
+        <div><input type="checkbox" name="top_article_is_premium_3" id="top_article_is_premium_3" checked />PREMIUM</div>
+      </div>
+    </div>
+    <div style="width:100%">
+      <label
+      class="mdc-text-field mdc-text-field--outlined"
+      style="margin-top: 24px; width: 100%"
+    >
+      <span class="mdc-notched-outline">
+        <span class="mdc-notched-outline__leading"></span>
+        <span class="mdc-notched-outline__notch">
+          <span class="mdc-floating-label" id="my-label-id"
+            >Third Article Title</span
+          >
+        </span>
+        <span class="mdc-notched-outline__trailing"></span>
+      </span>
+      <input
+        id="fouce-mid-article-3-title"
+        name="fouce-mid-article-3-title"
+        type="text"
+        placeholder="fill article title"
+        class="mdc-text-field__input"
+      />
+    </label>
+    </div>
+  </div>
 
-				<p class="mb5">Opinion</p>
-				<input name="opinion-news-1" type="url" placeholder="paste article link" alt="10" ><br>
-				<input name="opinion-news-2"  type="url" placeholder="paste article link" alt="11"><br>
+  <div style="display: flex; justify-content: space-between; flex-direction: column; border: 2px dashed #665fe8; padding: 10px; position: relative;">
+    <div class="ff__number">4</div>
+    <div style="width:100%;display: flex; justify-content: space-between; ">
+    <div style="width: 70%;">
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >Foor Article Link</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="fouce-mid-article-4"
+              type="url"
+              placeholder="paste top article link"
+              class="fouce-third-article-url focus-mid-article-url mdc-text-field__input"
+              alt="fouce_article-4"
+            />
+          </label>
+        </div>
+        <div class="fAlen" style="width: 15%;">
+          <label
+          class="mdc-text-field mdc-text-field--outlined"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id"
+                >Length</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            id="f-len-4"
+            name="f-len-4"
+            type="number"
+            value="4"
+            class="mdc-text-field__input"
+          />
+        </label>
+      </div>
+      <div class="fAlen" style="width: 15%; display: flex; align-items: center; padding: 20px 0px 0px 8px; flex-direction: column; font-size: 10px;">
+        <div style="display: none;"><input type="checkbox" name="top_article_is_show_img" id="top_article_is_show_img" checked />Image</div>
+        <div><input type="checkbox" name="top_article_is_premium_4" id="top_article_is_premium_4" checked />PREMIUM</div>
+      </div>
+    </div>
+    <div style="width:100%">
+      <label
+      class="mdc-text-field mdc-text-field--outlined"
+      style="margin-top: 24px; width: 100%"
+    >
+      <span class="mdc-notched-outline">
+        <span class="mdc-notched-outline__leading"></span>
+        <span class="mdc-notched-outline__notch">
+          <span class="mdc-floating-label" id="my-label-id"
+            >Four Article Title</span
+          >
+        </span>
+        <span class="mdc-notched-outline__trailing"></span>
+      </span>
+      <input
+        id="fouce-mid-article-4-title"
+        name="fouce-mid-article-4-title"
+        type="text"
+        placeholder="fill article title"
+        class="mdc-text-field__input"
+      />
+    </label>
+    </div>
+  </div>
 
+  <div style="display: flex; justify-content: space-between; flex-direction: column; border: 2px dashed #665fe8; padding: 10px; position: relative;">
+    <div class="ff__number">5</div>
+    <div style="width:100%;display: flex; justify-content: space-between; ">
+    <div style="width: 70%;">
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >Five Article Link</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="fouce-mid-article-5"
+              type="url"
+              placeholder="paste top article link"
+              class="fouce-third-article-url focus-mid-article-url mdc-text-field__input"
+              alt="fouce_article-5"
+            />
+          </label>
+        </div>
+        <div class="fAlen" style="width: 15%;">
+          <label
+          class="mdc-text-field mdc-text-field--outlined"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id"
+                >Length</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            id="f-len-5"
+            name="f-len-5"
+            type="number"
+            value="4"
+            class="mdc-text-field__input"
+          />
+        </label>
+      </div>
+      <div class="fAlen" style="width: 15%; display: flex; align-items: center; padding: 20px 0px 0px 8px; flex-direction: column; font-size: 10px;">
+        <div style="display: none;"><input type="checkbox" name="top_article_is_show_img" id="top_article_is_show_img" checked />Image</div>
+        <div><input type="checkbox" name="top_article_is_premium_5" id="top_article_is_premium_5" checked />PREMIUM</div>
+      </div>
+    </div>
+    <div style="width:100%">
+      <label
+      class="mdc-text-field mdc-text-field--outlined"
+      style="margin-top: 24px; width: 100%"
+    >
+      <span class="mdc-notched-outline">
+        <span class="mdc-notched-outline__leading"></span>
+        <span class="mdc-notched-outline__notch">
+          <span class="mdc-floating-label" id="my-label-id"
+            >Five Article Title</span
+          >
+        </span>
+        <span class="mdc-notched-outline__trailing"></span>
+      </span>
+      <input
+        id="fouce-mid-article-5-title"
+        name="fouce-mid-article-5-title"
+        type="text"
+        placeholder="fill article title"
+        class="mdc-text-field__input"
+      />
+    </label>
+    </div>
+  </div>
 
-				<div class="small-tag">EPOCH TV</div>
-				<input name="top-news-2" type="url" placeholder="paste article link" alt="12"><br>
-				<input name="top-news-3" type="url" placeholder="paste article link" alt="13"><br>
+          <p class="mb5">Favourites Articles</p>
+          <!-- 1.
+          <input
+            name="focus-bottom-article-news-1"
+            type="url"
+            placeholder="paste bottom article link"
+            class="focus-favourites-url"
+            alt="focus_favourites_article-1"
+          /><br /> -->
+          <div style="display: flex; justify-content: space-between; flex-direction: column; border: 2px dashed #308d3e; padding: 10px; position: relative;">
+            <div class="ff__number_f">1</div>
+            <div style="width:100%;display: flex; justify-content: space-between; ">
+              <div style="width: 87%;">
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >1 Article Link</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="focus-bottom-article-news-1"
+              type="url"
+              placeholder="paste bottom article link"
+              class="focus-favourites-url mdc-text-field__input"
+              alt="focus_favourites_article-1"
+            />
+          </label>
+        </div>
+        <div class="fAlen" style="width: 13%;">
+          <label
+          class="mdc-text-field mdc-text-field--outlined"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id"
+                >pt</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            id="pt-number-1"
+            name="pt-number-1"
+            type="number"
+            value="0"
+            class="mdc-text-field__input"
+          />
+        </label>
+      </div>
+        </div>
+  
+        <div style="width: 100%;">
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >1 Article Title</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="focus-bottom-article-news-1-title"
+              id="focus-bottom-article-news-1-title"
+              type="text"
+              placeholder="fill article title"
+              class="mdc-text-field__input"
+            />
+          </label>
+        </div>
+        </div>
+          <!-- 2.
+         <input
+            name="focus-bottom-article-news-2"
+            type="url"
+            placeholder="paste bottom article link"
+            class="focus-favourites-url"
+            alt="focus_favourites_article-2"
+          /><br /> -->
+          <div style="display: flex; justify-content: space-between; flex-direction: column; border: 2px dashed #308d3e; padding: 10px; position: relative;">
+            <div class="ff__number_f">2</div>
+            <div style="width:100%;display: flex; justify-content: space-between; ">
+              <div style="width: 87%;">
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >2 Article</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="focus-bottom-article-news-2"
+              type="url"
+              placeholder="paste bottom article link"
+              class="focus-favourites-url mdc-text-field__input"
+              alt="focus_favourites_article-2"
+            />
+          </label>
+        </div>
+        <div class="fAlen" style="width: 13%;">
+          <label
+          class="mdc-text-field mdc-text-field--outlined"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id"
+                >pt</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            id="pt-number-2"
+            name="pt-number-2"
+            type="number"
+            value="0"
+            class="mdc-text-field__input"
+          />
+        </label>
+      </div>
+        </div>
+        <div style="width: 100%;">
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >2 Article Title</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="focus-bottom-article-news-2-title"
+              id="focus-bottom-article-news-2-title"
+              type="text"
+              placeholder="fill article title"
+              class="mdc-text-field__input"
+            />
+          </label>
+        </div>
+        </div>
 
-				<div class="small-tag">DAILY RECIPE</div>
-				<input name="top-news-4" type="url" placeholder="paste article link" alt="14"><br>
-				
-			</section>
+        <div style="display: flex; justify-content: space-between; flex-direction: column; border: 2px dashed #308d3e; padding: 10px; position: relative;">
+          <div class="ff__number_f">3</div>
+          <div style="width:100%;display: flex; justify-content: space-between; ">
+            <div style="width: 87%;">
+        <label
+          class="mdc-text-field mdc-text-field--outlined"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id"
+                >3 Article</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            name="focus-bottom-article-news-3"
+            type="url"
+            placeholder="paste bottom article link"
+            class="focus-favourites-url mdc-text-field__input"
+            alt="focus_favourites_article-3"
+          />
+        </label>
+      </div>
+      <div class="fAlen" style="width: 13%;">
+        <label
+        class="mdc-text-field mdc-text-field--outlined"
+        style="margin-top: 24px; width: 100%"
+      >
+        <span class="mdc-notched-outline">
+          <span class="mdc-notched-outline__leading"></span>
+          <span class="mdc-notched-outline__notch">
+            <span class="mdc-floating-label" id="my-label-id"
+              >pt</span
+            >
+          </span>
+          <span class="mdc-notched-outline__trailing"></span>
+        </span>
+        <input
+          id="pt-number-3"
+          name="pt-number-3"
+          type="number"
+          value="0"
+          class="mdc-text-field__input"
+        />
+      </label>
+    </div>
+      </div>
+      <div style="width: 100%;">
+        <label
+          class="mdc-text-field mdc-text-field--outlined"
+          style="margin-top: 24px; width: 100%"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="my-label-id"
+                >3 Article Title</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            name="focus-bottom-article-news-3-title"
+            id="focus-bottom-article-news-3-title"
+            type="text"
+            placeholder="fill article title"
+            class="mdc-text-field__input"
+          />
+        </label>
+      </div>
+      </div>
 
-	
-		</form>
-		<br>
-		<button id="clear-all">clear all</button><br>
-		<button class="mb5" id="fillForm">Grab data from Google</button>
-	</div>
-	<div class="result">
-		<iframe frameborder="0"></iframe>
-	</div>
+      <div style="display: flex; justify-content: space-between; flex-direction: column; border: 2px dashed #308d3e; padding: 10px; position: relative;">
+        <div class="ff__number_f">4</div>
+        <div style="width:100%;display: flex; justify-content: space-between; ">
+          <div style="width: 87%;">
+      <label
+        class="mdc-text-field mdc-text-field--outlined"
+        style="margin-top: 24px; width: 100%"
+      >
+        <span class="mdc-notched-outline">
+          <span class="mdc-notched-outline__leading"></span>
+          <span class="mdc-notched-outline__notch">
+            <span class="mdc-floating-label" id="my-label-id"
+              >4 Article</span
+            >
+          </span>
+          <span class="mdc-notched-outline__trailing"></span>
+        </span>
+        <input
+          name="focus-bottom-article-news-4"
+          type="url"
+          placeholder="paste bottom article link"
+          class="focus-favourites-url mdc-text-field__input"
+          alt="focus_favourites_article-4"
+        />
+      </label>
+    </div>
+    <div class="fAlen" style="width: 13%;">
+      <label
+      class="mdc-text-field mdc-text-field--outlined"
+      style="margin-top: 24px; width: 100%"
+    >
+      <span class="mdc-notched-outline">
+        <span class="mdc-notched-outline__leading"></span>
+        <span class="mdc-notched-outline__notch">
+          <span class="mdc-floating-label" id="my-label-id"
+            >pt</span
+          >
+        </span>
+        <span class="mdc-notched-outline__trailing"></span>
+      </span>
+      <input
+        id="pt-number-4"
+        name="pt-number-4"
+        type="number"
+        value="0"
+        class="mdc-text-field__input"
+      />
+    </label>
+  </div>
+    </div>
+    <div style="width: 100%;">
+      <label
+        class="mdc-text-field mdc-text-field--outlined"
+        style="margin-top: 24px; width: 100%"
+      >
+        <span class="mdc-notched-outline">
+          <span class="mdc-notched-outline__leading"></span>
+          <span class="mdc-notched-outline__notch">
+            <span class="mdc-floating-label" id="my-label-id"
+              >4 Article Title</span
+            >
+          </span>
+          <span class="mdc-notched-outline__trailing"></span>
+        </span>
+        <input
+          name="focus-bottom-article-news-4-title"
+          id="focus-bottom-article-news-4-title"
+          type="text"
+          placeholder="fill article title"
+          class="mdc-text-field__input"
+        />
+      </label>
+    </div>
+    </div>
 
-	<script>
-		(function () {
-			document.querySelectorAll('input').forEach(function (field) {
-				field.value = localStorage.getItem(field.name)
+          <!-- <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >3 Article</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="focus-bottom-article-news-3"
+              type="url"
+              placeholder="paste bottom article link"
+              class="focus-favourites-url mdc-text-field__input"
+              alt="focus_favourites_article-3"
+            />
+          </label>
 
-				field.addEventListener('blur', function (e) {
-					// console.log(e.target.name)
-					localStorage.setItem(e.target.name, e.target.value);
-				})
-			})
-			document.querySelectorAll('textarea').forEach(function (field) {
-				field.value = localStorage.getItem(field.name)
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >4 Article</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              name="focus-bottom-article-news-4"
+              type="url"
+              placeholder="paste bottom article link"
+              class="focus-favourites-url mdc-text-field__input"
+              alt="focus_favourites_article-4"
+            />
+          </label> -->
+        </section>
 
-				field.addEventListener('blur', function (e) {
-					// console.log(e.target.name)
-					localStorage.setItem(e.target.name, e.target.value);
-				})
-			})
+        <section class="topStoryAlert newsletter-ca">
+          <h4>Top Story Alert</h4>
+          <!-- <p class="mb5">Top Article</p>
+          <input
+            name="topStoryAlert-top-article"
+            type="url"
+            placeholder="paste top article link"
+            class="top-story-alert-top-article-url"
+            alt="top_story_alert_top_article"
+          /><br /> -->
+          <div style="display: flex; justify-content: space-between; flex-direction: row;position: relative;">
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 85%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >Top Article</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
 
-			document.getElementById('clear-all').addEventListener('click', function () {
-				document.querySelectorAll('input').forEach(function (field) {field.value = ''})
-				document.querySelectorAll('textarea').forEach(function (field) {field.value = ''})
-			})
-		})()
-	</script>
-	
-</body>
+            <input
+              name="topStoryAlert-top-article"
+              type="url"
+              placeholder="paste top article link"
+              class="top-story-alert-top-article-url mdc-text-field__input"
+              alt="top_story_alert_top_article"
+            />
+          </label>
+          <div class="fAlen" style="width: 15%;">
+            <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >Length</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+            <input
+              id="topStoryAlert-top-article-len"
+              name="topStoryAlert-top-article-len"
+              type="number"
+              value="3"
+              class="mdc-text-field__input"
+            />
+          </label>
+          </div>
+        </div>
+          <!-- <p class="mb5">Epcoh TV</p>
+          <input
+            name="topStoryAlert-article-tv"
+            type="url"
+            placeholder="paste bottom article link"
+            class="top-story-alert-tv-url"
+            alt="top_story_alert_tv_article"
+          /><br /> -->
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >Epcoh TV</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+
+            <input
+              name="topStoryAlert-article-tv"
+              type="url"
+              placeholder="paste bottom article link"
+              class="top-story-alert-tv-url mdc-text-field__input"
+              alt="top_story_alert_article_tv"
+            />
+          </label>
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%; display: none;"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >Image Url</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+
+            <input
+              id="topStoryAlert-bottom-image-url"
+              name="topStoryAlert-bottom-image-url"
+              type="url"
+              placeholder="bottom image link"
+              class="topStoryAlert-bottom-image-url mdc-text-field__input"
+            />
+          </label>
+          <label
+            class="mdc-text-field mdc-text-field--outlined"
+            style="margin-top: 24px; width: 100%; display: none;"
+          >
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label" id="my-label-id"
+                  >Image Link</span
+                >
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+
+            <input
+              id="topStoryAlert-bottom-image-link"
+              name="topStoryAlert-bottom-image-link"
+              type="url"
+              placeholder="bottom image link"
+              class="topStoryAlert-bottom-image-link mdc-text-field__input"
+              alt="topStoryAlert-bottom-image"
+            />
+          </label>
+        </section>
+      </form>
+      <br />
+      <!-- <button id="clear-all">clear all</button><br /> -->
+      <button
+        class="mdc-button mdc-button--raised foo-button"
+        id="clear-all"
+        style="margin-bottom: 24px"
+      >
+        <div class="mdc-button__ripple"></div>
+        <i class="material-icons mdc-button__icon" aria-hidden="true"
+          >delete_forever</i
+        >
+        <span class="mdc-button__label">clear all</span></button
+      ><br />
+      <!-- <button class="mb5" id="fillForm">Grab data from Google</button> -->
+      <button class="mdc-button mdc-button--raised foo-button" id="fillForm">
+        <div class="mdc-button__ripple"></div>
+        <i class="material-icons mdc-button__icon" aria-hidden="true"
+          >get_app</i
+        >
+        <span class="mdc-button__label">Grab data from Google</span>
+      </button>
+    </div>
+    <div class="result">
+      <iframe frameborder="0"></iframe>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        mdc.ripple.MDCRipple.attachTo(document.querySelector(".foo-button"));
+        // const checkbox = new mdc.checkbox.MDCCheckbox(document.querySelector('.mdc-checkbox'));
+		const textFields = document.querySelectorAll(".mdc-text-field ");
+		textFields.forEach((textFieldElement) => {
+          const textField = new mdc.textField.MDCTextField(textFieldElement);
+        });
+        const textFields_ff = document.querySelectorAll(".mdc-text-label-ff");
+        textFields_ff.forEach((textFieldElement) => {
+          const textField = new mdc.textField.MDCTextField(textFieldElement);
+		  textField.foundation.activateFocus();
+        });
+      });
+              //iframe resize height
+              window.addEventListener("resize",function(){
+          
+          const markHeight=document.querySelector(".maker").offsetHeight;
+          console.log(markHeight)
+          document.querySelector(".result iframe").style.height = markHeight;
+        });
+      (function () {
+        mdc.ripple.MDCRipple.attachTo(document.querySelector(".foo-button"));
+        document.querySelectorAll("input").forEach(function (field) {
+          field.value = localStorage.getItem(field.name);
+
+          field.addEventListener("blur", function (e) {
+            // console.log(e.target.name)
+            localStorage.setItem(e.target.name, e.target.value);
+          });
+        });
+        document.querySelectorAll("textarea").forEach(function (field) {
+          field.value = localStorage.getItem(field.name);
+
+          field.addEventListener("blur", function (e) {
+            // console.log(e.target.name)
+            localStorage.setItem(e.target.name, e.target.value);
+          });
+        });
+
+        document
+          .getElementById("clear-all")
+          .addEventListener("click", function () {
+            document.querySelectorAll("input").forEach(function (field) {
+              field.value = "";
+            });
+            document.querySelectorAll("textarea").forEach(function (field) {
+              field.value = "";
+            });
+          });
+      })();
+    </script>
+  </body>
 </html>
