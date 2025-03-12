@@ -445,7 +445,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         //get top article information
         // const fta = document.querySelector(".focus-top-article-url");
         article = await openTemplate(newsletterTemplate.top);
-        const editorNote = document.getElementById("fouce-editor-note")
+        const editorNote = document.getElementById("focus-editor-note")
         article = article.replace(
           new RegExp("{{editor-note}}", "g"),
           editorNote.value
