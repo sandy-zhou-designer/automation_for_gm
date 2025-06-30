@@ -914,12 +914,31 @@ function getFirstThreeParagraphs(doc, len = 3) {
   let firstThreeParagraphs = [];
   for (let i = 0; i < Math.min(len, paragraphs.length); i++) {
     if (
-      paragraphs[i].innerHTML.indexOf("epoch_component") < 0 &&
-      paragraphs[i].innerHTML.indexOf("<img ") < 0
+      paragraphs[i].innerHTML.indexOf("epoch_component") < 0
     ) {
       // console.log(paragraphs[i].innerHTML)
-      firstThreeParagraphs.push(
-        `<p
+      if (paragraphs[i].innerHTML.indexOf("<img ") >= 0) {
+        let html = paragraphs[i].innerHTML;
+        html = html.replace(/<img\b[^>]*>/gi, (imgTag) => {
+          let srcMatch = imgTag.match(/data-src="([^"]+)"/);
+          if (srcMatch) {
+            let newSrc = srcMatch[1];
+            return imgTag
+              .replace(/loading="lazy"/g, "")
+              .replace(/\bclass="([^"]*\blazy\b[^"]*)"/g, (m, cls) => {
+                let newCls = cls
+                  .split(" ")
+                  .filter(c => c !== "lazy")
+                  .join(" ");
+                return newCls ? `class="${newCls}"` : "";
+              })
+              .replace(/data-src="[^"]+"/g, "")
+              .replace(/src="[^"]+"/g, `src="${newSrc}"`);
+          }
+          return imgTag;
+        });
+        firstThreeParagraphs.push(
+          `<p
                           style="
                             font-family: Georgia;
                             font-size: 19px;
@@ -933,9 +952,29 @@ function getFirstThreeParagraphs(doc, len = 3) {
                           "
                           class="article_paragraph"
                         >` +
-        paragraphs[i].innerHTML +
-        "</p>"
-      );
+          html +
+          "</p>"
+        );
+      } else {
+        firstThreeParagraphs.push(
+          `<p
+                          style="
+                            font-family: Georgia;
+                            font-size: 19px;
+                            font-style: normal;
+                            font-weight: 400;
+                            line-height: 160%;
+                            color: #000;
+                            margin-top: 5px;
+                            mso-line-height-alt: 1.6;
+                            margin-bottom: 10px;
+                          "
+                          class="article_paragraph"
+                        >` +
+          paragraphs[i].innerHTML +
+          "</p>"
+        );
+      }
     }
   }
 
