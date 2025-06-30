@@ -445,10 +445,20 @@ window.addEventListener("DOMContentLoaded", async () => {
         //get top article information
         // const fta = document.querySelector(".focus-top-article-url");
         article = await openTemplate(newsletterTemplate.top);
-        const editorNote = document.getElementById("focus-editor-note")
+        const top_image_url = document.getElementById("focus-top-image-url")
         article = article.replace(
-          new RegExp("{{editor-note}}", "g"),
-          editorNote.value
+          new RegExp("{{top-image-url}}", "g"),
+          top_image_url.value
+        );
+        const editorNote1 = document.getElementById("focus-editor-note1")
+        article = article.replace(
+          new RegExp("{{editor-note1}}", "g"),
+          editorNote1.value
+        );
+        const editorNote2 = document.getElementById("focus-editor-note2")
+        article = article.replace(
+          new RegExp("{{editor-note2}}", "g"),
+          editorNote2.value
         );
         template = template.replace(
           new RegExp("{{fouce-top-article}}", "g"),
@@ -657,8 +667,14 @@ function contentMake(key, copy) {
 //update by alan display short date
 function getFormattedTomorrow(is_short = "long") {
   const options = { year: "numeric", month: is_short, day: "numeric" };
-  const tomorrow = new Date();
-  // tomorrow.setDate(tomorrow.getDate() + 1); // Add 1 day to get tomorrow's date
+  const f_date = document.querySelector('input[name="copy-date"]');
+  let tomorrow = new Date();
+  if (f_date && f_date.value) {
+    const [year, month, day] = f_date.value.split("-").map(Number);
+    tomorrow = new Date(year, month - 1, day);
+  } else {
+    tomorrow.setDate(tomorrow.getDate() + 1); // Add 1 day to get tomorrow's date
+  }
   const formattedTomorrow = tomorrow.toLocaleDateString("en-US", options);
   return formattedTomorrow;
 }
@@ -1024,7 +1040,14 @@ function getWordsInsideParentheses(inputString) {
 
 function getTomorrowDate() {
   var tomorrow = new Date();
-  // tomorrow.setDate(tomorrow.getDate() + 1); // Add 1 day to get tomorrow's date
+  const f_date = document.querySelector('input[name="copy-date"]');
+  if (f_date && f_date.value) {
+    const [year, month, day] = f_date.value.split("-").map(Number);
+    tomorrow = new Date(year, month - 1, day);
+  } else {
+    tomorrow.setDate(tomorrow.getDate() + 1); // Add 1 day to get tomorrow's date
+  }
+
 
   var dd = String(tomorrow.getDate()).padStart(2, "0");
   var mm = String(tomorrow.getMonth() + 1).padStart(2, "0"); // January is 0!
@@ -1147,6 +1170,7 @@ function updateFormInputs(formSelector, formData) {
   const form = document.querySelector(formSelector); // Select the existing form by its selector
   formData = cleanUpData(formData);
   checkForDuplicateLinks(formData);
+  console.log(formData)
   Object.values(formData).forEach((item) => {
     // Query both input and textarea elements within the form that match the item's id as their name attribute
     const element = form.querySelector(
@@ -1167,6 +1191,7 @@ async function setupButtonClick() {
   await fetchSheetData();
   if (button) {
     button.addEventListener("click", function () {
+      console.log(globalSheetData)
       updateFormInputs("form", globalSheetData); // Adjust 'form' if your form has a more specific selector
     });
   } else {
