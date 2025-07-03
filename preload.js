@@ -461,7 +461,7 @@ window.addEventListener("DOMContentLoaded", async () => {
           editorNote2.value
         );
         template = template.replace(
-          new RegExp("{{fouce-top-article}}", "g"),
+          new RegExp("{{focus-top-article}}", "g"),
           article
         );
         //get mid articles
@@ -510,11 +510,11 @@ window.addEventListener("DOMContentLoaded", async () => {
           _idx++;
         }
         //get second article information
-        // const fsa = document.querySelector(".fouce-second-article-url");
+        // const fsa = document.querySelector(".focus-second-article-url");
         // article = await openTemplate(newsletterTemplate.second);
         // await getArticle(
         //   fsa.value,
-        //   "fouce-second-article",
+        //   "focus-second-article",
         //   renderPost,
         //   "article",
         //   false,
@@ -846,7 +846,7 @@ async function loadHTML(
       image_caption = getWordsInsideParentheses(image_caption);
     }
 
-    var utm = "%26utm_source=" + trackingName + userStatus;
+    var utm = "utm_source=" + trackingName + userStatus;
     // if(newsletter==="morningbrief"||newsletter==="weekendbrief"){
 
     //    utm = utm + abTesting
