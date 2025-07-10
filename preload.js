@@ -110,7 +110,9 @@ var templateList = {
     top: "./templates/focus/focus_top.html",
     mid: "./templates/focus/focus_mid_article.html",
     favourites: "./templates/focus/focus_articles.html",
+    related: "./templates/focus/focus_related_articles.html",
     article: "./templates/focus/focus_article.html",
+    article_related: "./templates/focus/focus_related_article.html",
   },
   topStoryAlert: {
     template: "./templates/topStoryAlert/topStoryAlert_main.html",
@@ -521,6 +523,23 @@ window.addEventListener("DOMContentLoaded", async () => {
             0,
             is_show_img
           );
+          _idx++;
+        }
+        //focus related articles
+        var focusRelatedArticle = await openTemplate(
+          newsletterTemplate.related
+        );
+        template = template.replace(
+          new RegExp("{{focus-related-articles-section}}", "g"),
+          focusRelatedArticle
+        );
+
+        const frArticles = document.querySelectorAll(".focus-related-url");
+        _idx = 1;
+        for (const item of frArticles) {
+          article = await openTemplate(newsletterTemplate.article_related);
+          const ptn = document.getElementById(`related-pt-number-${_idx}`);
+          await getArticle(item.value, item.name, renderPost, "article", false, 3, _idx, parseInt(ptn.value));
           _idx++;
         }
         //get second article information
