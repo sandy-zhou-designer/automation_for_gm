@@ -460,6 +460,11 @@ window.addEventListener("DOMContentLoaded", async () => {
           new RegExp("{{editor-note2}}", "g"),
           editorNote2.value
         );
+        const editorNote3 = document.getElementById("focus-editor-note3")
+        article = article.replace(
+          new RegExp("{{editor-note3}}", "g"),
+          editorNote3.value
+        );
         template = template.replace(
           new RegExp("{{focus-top-article}}", "g"),
           article
@@ -484,6 +489,15 @@ window.addEventListener("DOMContentLoaded", async () => {
             article = article.replace(/<\/?is_premium>/g, "").trim();
           } else {
             article = article.replace(/<is_premium>[\s\S]*?<\/is_premium>/g, "").trim();
+          }
+
+          var isExplainer = true;
+          const chk_explainer = document.getElementById(`top_article_is_explainer_${_idx}`);
+          isExplainer = chk_explainer.checked
+          if (isExplainer) {
+            article = article.replace(/<\/?is_explainer>/g, "").trim();
+          } else {
+            article = article.replace(/<is_explainer>[\s\S]*?<\/is_explainer>/g, "").trim();
           }
           // console.log(article)
 
@@ -538,6 +552,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
         //replace MB_cta code
         template = template.replace(/MB_cta_free/g, "focus_cta_free");
+        template = template.replace(/MB_reactive_cta/g, "focus_reactive_cta");
+        template = template.replace(/morningbrief-/g, "focus-");
+        template = template.replace("https://img.theepochtimes.com/assets/uploads/2022/10/13/wild.001-550x330.jpeg", "https://img.theepochtimes.ca/img/focus_20250711_3_cover.png");
+
       }
 
       //create top story alert newsletter email template add by alan
@@ -771,6 +789,35 @@ async function getArticle(
   return;
 }
 
+function wrapTagsWithPConverted(htmlString, tagsToWrap = ['H2', 'H3', 'H4']) {
+  const container = document.createElement("div");
+  container.innerHTML = htmlString;
+
+  let children = Array.from(container.children);
+
+  for (let i = children.length - 1; i >= 0; i--) {
+    const node = children[i];
+    if (tagsToWrap.includes(node.tagName)) {
+      // 创建 <p>
+      const wrapper = document.createElement("p");
+
+      // 创建 <span> 替代 <h2> 标签
+      const span = document.createElement("span");
+      span.className = `p_${node.tagName}`
+      span.innerHTML = node.innerHTML;
+
+      node.parentNode.insertBefore(wrapper, node);
+      wrapper.appendChild(span);
+      node.remove();
+    }
+  }
+
+  return container.innerHTML;
+}
+
+
+
+
 async function loadHTML(
   url,
   key,
@@ -793,6 +840,7 @@ async function loadHTML(
     var newTitle = customizedTitle(key);
 
     var title = newTitle ? newTitle : data.title;
+    var shortCode = data.shortcodes ? data.shortcodes : [];
     var authorImage = "";
     var authorUrl = "";
     var categories = "";
@@ -826,17 +874,18 @@ async function loadHTML(
     //     myTags = categories.slice(0, 4).map(category => category.name).join(" • ");
     // }
     // console.log("myTags is ",myTags);
-    const content = data.api_content;
+    var content1 = data.api_content;
+    var content = wrapTagsWithPConverted(content1, ['H2', 'H3', 'H4']);
     var img = data.thumbnail;
     if (isSmallImg) {
       img = data.thumbnail_small;
     }
     parser = new DOMParser();
     const html = parser.parseFromString(content, "text/html");
-    var first_three_p = getFirstThreeParagraphs(html, lenOfParagraph);
+    var first_three_p = getFirstThreeParagraphs(html, lenOfParagraph, shortCode);
     var first_three_word = html.querySelector("p").innerText;
     first_three_word = truncateStringByWords(first_three_word, 50);
-    var userStatus = includingPromo ? "free" : "paid";
+    var userStatus = includingPromo ? (userType == "cancel" ? "reactive" : userType) : "paid";
     // var abTesting= includingPromo?"_BH2":"_new"
 
     // var trackingName = (newsletter==="sevenDays")?"sevenDays":"epochTV_"
@@ -908,13 +957,13 @@ async function loadHTML(
   }
 }
 
-function getFirstThreeParagraphs(doc, len = 3) {
+function getFirstThreeParagraphs(doc, len = 3, shortCode = []) {
   const paragraphs = doc.querySelectorAll("p");
 
   let firstThreeParagraphs = [];
   for (let i = 0; i < Math.min(len, paragraphs.length); i++) {
     if (
-      paragraphs[i].innerHTML.indexOf("epoch_component") < 0
+      paragraphs[i].innerHTML.indexOf("epoch_component") < 0 && paragraphs[i].innerHTML.indexOf("shortcode") < 0
     ) {
       // console.log(paragraphs[i].innerHTML)
       if (paragraphs[i].innerHTML.indexOf("<img ") >= 0) {
@@ -937,6 +986,7 @@ function getFirstThreeParagraphs(doc, len = 3) {
           }
           return imgTag;
         });
+        const _html1 = removeLinks(html);
         firstThreeParagraphs.push(
           `<p
                           style="
@@ -952,12 +1002,32 @@ function getFirstThreeParagraphs(doc, len = 3) {
                           "
                           class="article_paragraph"
                         >` +
-          html +
+          _html1 +
           "</p>"
         );
       } else {
-        firstThreeParagraphs.push(
-          `<p
+        const _html1 = removeLinks(paragraphs[i].innerHTML);
+        if (_html1.indexOf("p_") >= 0) {
+          firstThreeParagraphs.push(
+            `<p
+                          style="
+    font-family: Georgia;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 110%;
+    color: #000;
+    margin-top: 32px;
+    margin-bottom: 10px;
+                          "
+                          class="article_paragraph"
+                        >` +
+            _html1 +
+            "</p>"
+          );
+        } else {
+          firstThreeParagraphs.push(
+            `<p
                           style="
                             font-family: Georgia;
                             font-size: 19px;
@@ -971,14 +1041,58 @@ function getFirstThreeParagraphs(doc, len = 3) {
                           "
                           class="article_paragraph"
                         >` +
-          paragraphs[i].innerHTML +
-          "</p>"
-        );
+            _html1 +
+            "</p>"
+          );
+        }
       }
+    } else {
+      const str = paragraphs[i].innerHTML;
+      const match = str.match(/\[shortcode\](\d+)\[\/shortcode\]/);
+
+      if (match) {
+        const number = match[1];
+        if (number != 3) {
+          // console.log(number)
+          firstThreeParagraphs.push(
+            `<p
+                          style="
+                            font-family: Georgia;
+                            font-size: 13px;
+                            font-style: normal;
+                            font-weight: 400;
+                            line-height: 160%;
+                            color: #000;
+                            margin-top: 5px;
+                            mso-line-height-alt: 1.6;
+                            margin-bottom: 10px;
+                          "
+                          class="article_paragraph article_shortcode"
+                        >` +
+            shortCode[number].replace(/^\[caption[^\]]*\]|\[\/caption\]$/g, "").trim() +
+            "</p>"
+          );
+        }
+      }
+
     }
   }
 
   return firstThreeParagraphs.join("");
+}
+
+function removeLinks(htmlString) {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = htmlString;
+
+  const links = tempDiv.querySelectorAll("a");
+
+  links.forEach(link => {
+    const textNode = document.createTextNode(link.textContent);
+    link.replaceWith(textNode);
+  });
+
+  return tempDiv.innerHTML;
 }
 
 async function makeAuthor(url, key) {
