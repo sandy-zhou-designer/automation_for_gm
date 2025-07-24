@@ -120,6 +120,16 @@ var templateList = {
     tv: "./templates/topStoryAlert/topStoryAlert_tv.html",
     bottom: "./templates/topStoryAlert/topStoryAlert_bottom.html",
   },
+  top5: {
+    template: "./templates/top5/top5_main.html",
+    article: "./templates/top5/top5_article.html",
+  },
+  opinion: {
+    template: "./templates/opinion/opinion_main.html",
+    top_article: "./templates/opinion/opinion_top_article.html",
+    mid: "./templates/opinion/opinion_mid_articles.html",
+    mid_article: "./templates/opinion/opinion_mid_article.html",
+  },
 };
 
 var dividerHtml = "";
@@ -132,6 +142,8 @@ var listOfUtms = {
   oldbrief: "MB_article_",
   focus: "focus_article_",
   topStoryAlert: "topStoryAlert_article_",
+  top5: "top5_article_",
+  opinion: "opinion_article_",
 };
 
 var otherNewslettersList = {
@@ -221,7 +233,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
     // getRandomNewsletters();
-    if (newsletter != "focus" && newsletter != "topStoryAlert") {
+    if (newsletter != "focus" && newsletter != "topStoryAlert" && newsletter != "top5" && newsletter != "opinion") {
       getNewslettersByDate();
       console.log("letter 1 ", letter1);
       console.log("letter 2 ", letter2);
@@ -575,6 +587,14 @@ window.addEventListener("DOMContentLoaded", async () => {
         template = template.replace(/morningbrief-/g, "focus-");
         template = template.replace("https://img.theepochtimes.com/assets/uploads/2022/10/13/wild.001-550x330.jpeg", "https://img.theepochtimes.ca/img/focus_20250711_3_cover.png");
 
+        let oldImageUrl = "https://img.theepochtimes.com/assets/uploads/2025/07/07/id5883774-Feature-Picture-13-1200x851.png";
+        let newImageUrl = "https://img.theepochtimes.ca/img/focus_20250711_1_cover.jpg";
+        template = template.replace(
+          new RegExp(oldImageUrl.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'),
+          newImageUrl
+        );
+
+
       }
 
       //create top story alert newsletter email template add by alan
@@ -631,6 +651,163 @@ window.addEventListener("DOMContentLoaded", async () => {
         //   new RegExp("{{topStoryAlert-bottom}}"),
         //   topStoryAlertBottom
         // );
+      }
+
+      if (newsletter == "top5") {
+        //display today short date
+        template = template.replace(
+          new RegExp("{{today-date}}"),
+          getFormattedTomorrow("short")
+        );
+
+        //footer date
+        template = template.replace(
+          new RegExp("{{date}}", "g"),
+          getTomorrowDate()
+        );
+        //get mid articles
+        // var focusMidArticle = await openTemplate(
+        //   newsletterTemplate.mid
+        // );
+
+        const fmidArticles = document.querySelectorAll(
+          ".top5-article-url"
+        );
+        var _idx = 1;
+        for (const item of fmidArticles) {
+          article = await openTemplate(newsletterTemplate.article);
+
+          // console.log(article)
+
+          const top5_label = document.getElementById(`top5-label-${_idx}`);
+          const top5_content = document.getElementById(`top5-article-${_idx}-content`);
+
+          await getArticle_top5(
+            item.value,
+            item.name,
+            renderPost_top5,
+            "article",
+            top5_label.value,
+            top5_content.value
+          );
+          _idx++;
+        }
+
+        //replace MB_cta code
+        template = template.replace(/MB_cta_free/g, "top5_cta_free_a");
+        template = template.replace(/MB_reactive_cta/g, "top5_reactive_cta_a");
+        template = template.replace(/morningbrief-/g, "top5-a-");
+        template = template.replace("https://img.theepochtimes.com/assets/uploads/2022/10/13/wild.001-550x330.jpeg", "https://img.theepochtimes.ca/img/focus_20250711_3_cover.png");
+
+        let oldImageUrl = "https://img.theepochtimes.com/assets/uploads/2025/07/07/id5883774-Feature-Picture-13-1200x851.png";
+        let newImageUrl = "https://img.theepochtimes.ca/img/focus_20250711_1_cover.jpg";
+        template = template.replace(
+          new RegExp(oldImageUrl.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'),
+          newImageUrl
+        );
+
+        parser = new DOMParser();
+        const html = parser.parseFromString(template, "text/html");
+
+        const links = html.querySelector(".share_email_a");
+
+        let mid_share_email = html.getElementById("mid_share_email");
+        mid_share_email.href = links.href;
+
+        template = template.replace("{{share_email_a}}", links.href);
+      }
+
+      if (newsletter == "opinion") {
+        //display today short date
+        template = template.replace(
+          new RegExp("{{today-date}}"),
+          getFormattedTomorrow("short")
+        );
+
+        //footer date
+        template = template.replace(
+          new RegExp("{{date}}", "g"),
+          getTomorrowDate()
+        );
+        //get mid articles
+        // var focusMidArticle = await openTemplate(
+        //   newsletterTemplate.mid
+        // );
+
+        const fmidArticles = document.querySelectorAll(
+          ".opinion-article-url"
+        );
+        var _idx = 1;
+        for (const item of fmidArticles) {
+          article = await openTemplate(newsletterTemplate.top_article);
+
+          if (_idx < 7) {
+            if (_idx == 1 && userType != "paid") {
+              article = article.replace(/<is_show_border>[\s\S]*?<\/is_show_border>/g, "").trim();
+            } else {
+              article = article.replace(/<\/?is_show_border>/g, "").trim();
+            }
+          } else {
+            article = article.replace(/<is_show_border>[\s\S]*?<\/is_show_border>/g, "").trim();
+          }
+
+          // console.log(article)
+
+          const opinion_content = document.getElementById(`opinion-article-${_idx}-content`);
+
+          await getArticle_opinion(
+            item.value,
+            item.name,
+            renderPost_opinion,
+            "article",
+            opinion_content.value
+          );
+          _idx++;
+        }
+
+        var moreOpinionSection = await openTemplate(
+          newsletterTemplate.mid
+        );
+
+        template = template.replace(
+          new RegExp("{{opinion-mid-articles}}", "g"),
+          ""
+        );
+        // template = template.replace(
+        //   new RegExp("{{opinion-mid-articles}}", "g"),
+        //   moreOpinionSection
+        // );
+        // const ffArticles = document.querySelectorAll(".more-opinion-url");
+        // _idx = 1;
+        // for (const item of ffArticles) {
+        //   article = await openTemplate(newsletterTemplate.mid_article);
+        //   // const ptn = document.getElementById(`pt-number-${_idx}`);
+        //   await getArticle(item.value, item.name, renderPost, "article", false, 3, _idx, 0);
+        //   _idx++;
+        // }
+
+        //replace MB_cta code
+        template = template.replace(/MB_cta_free/g, "opinion_cta_free_a");
+        template = template.replace(/MB_reactive_cta/g, "opinion_reactive_cta_a");
+        template = template.replace(/morningbrief-/g, "opinion-a-");
+        // template = template.replace("https://img.theepochtimes.com/assets/uploads/2022/10/13/wild.001-550x330.jpeg", "https://img.theepochtimes.ca/img/focus_20250711_3_cover.png");
+
+        // let oldImageUrl = "https://img.theepochtimes.com/assets/uploads/2025/07/07/id5883774-Feature-Picture-13-1200x851.png";
+        // let newImageUrl = "https://img.theepochtimes.ca/img/focus_20250711_1_cover.jpg";
+        // template = template.replace(
+        //   new RegExp(oldImageUrl.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'),
+        //   newImageUrl
+        // );
+
+        parser = new DOMParser();
+        const html = parser.parseFromString(template, "text/html");
+
+        const links = html.querySelector(".share_email_a");
+
+        let mid_share_email = html.getElementById("mid_share_email");
+        mid_share_email.href = links.href;
+
+        template = template.replace("{{share_email_a}}", links.href);
       }
     }
 
@@ -785,6 +962,144 @@ async function renderPost(key, post, type) {
     return result;
   }
 }
+
+async function renderPost_top5(key, post, type) {
+  const typeToFunction = {
+    article: makeArticle(article, post),
+    opinion: makeArticle(opinion, post),
+    tv: makeArticle(tv, post),
+    other: makeArticle(other, post),
+    top: makeArticle(top, post),
+    highlight: makeArticle(highlight, post),
+    highlight2: makeArticle(highlight2, post),
+    list: makeArticle(list, post),
+    first: makeArticle(first, post),
+    recommends: makeArticle(recommends, post),
+    happy: makeArticle(happy, post),
+  };
+
+  if (type in typeToFunction) {
+    template = template.replace(
+      new RegExp("{{" + key + "}}", "g"),
+      makeArticle(article, post)
+    );
+  }
+
+  waitOff();
+
+  function makeArticle(articleType, post) {
+    if (!post) return "";
+
+    // console.log(post)
+
+    // if (articleType ==="top"){
+    //   console.log("top html is ", top)
+    // }
+
+    const replacements = {
+      "{{article-link}}": post.url,
+      "{{article-title}}": post.title,
+      "{{article-author}}": post.author,
+      "{{utm}}": post.utm + "_a",
+      "{{date}}": getTomorrowDate(),
+      "{{author-img}}": post.authorImage,
+      "{{trackingName}}": post.trackingName,
+      "{{article-img}}": post.img,
+      "{{image_caption}}": post.image_caption,
+      "{{author-url}}": post.authorUrl,
+      "{{categories}}": post.categories,
+      "{{author-name}}": post.author,
+      "{{author-title}}": post.authorTitle,
+      // "{{idx}}": post.index,
+      // '{{utmContent}}':post.utmContent ,
+      "{{alt}}": post.alt,
+      "{{article-label}}": post.top5_label,
+      "{{article-content}}": post.top5_content,
+    };
+
+    // console.log(articleType);
+
+    let result = articleType;
+
+    for (const [placeholder, value] of Object.entries(replacements)) {
+      result = result.replace(new RegExp(placeholder, "g"), value);
+    }
+
+    // console.log(result);
+
+    return result;
+  }
+}
+
+async function renderPost_opinion(key, post, type) {
+  const typeToFunction = {
+    article: makeArticle(article, post),
+    opinion: makeArticle(opinion, post),
+    tv: makeArticle(tv, post),
+    other: makeArticle(other, post),
+    top: makeArticle(top, post),
+    highlight: makeArticle(highlight, post),
+    highlight2: makeArticle(highlight2, post),
+    list: makeArticle(list, post),
+    first: makeArticle(first, post),
+    recommends: makeArticle(recommends, post),
+    happy: makeArticle(happy, post),
+  };
+
+  if (type in typeToFunction) {
+    template = template.replace(
+      new RegExp("{{" + key + "}}", "g"),
+      makeArticle(article, post)
+    );
+  }
+
+  waitOff();
+
+  function makeArticle(articleType, post) {
+    if (!post) return "";
+
+    // console.log(post)
+
+    // if (articleType ==="top"){
+    //   console.log("top html is ", top)
+    // }
+
+    let opinion_content = getOpinionParagraphs(post.opinion_content);
+
+    const replacements = {
+      "{{article-link}}": post.url,
+      "{{article-title}}": post.title,
+      "{{article-author}}": post.author,
+      "{{utm}}": post.utm + "_a",
+      "{{date}}": getTomorrowDate(),
+      "{{author-img}}": post.authorImage,
+      "{{trackingName}}": post.trackingName,
+      "{{article-img}}": post.img,
+      "{{image_caption}}": post.image_caption,
+      "{{author-url}}": post.authorUrl,
+      "{{categories}}": post.categories,
+      "{{author-name}}": post.author,
+      "{{author-title}}": post.authorTitle,
+      // "{{idx}}": post.index,
+      // '{{utmContent}}':post.utmContent ,
+      "{{alt}}": post.alt,
+      "{{article-content}}": opinion_content,
+    };
+
+    // console.log(articleType);
+
+    let result = articleType;
+
+    for (const [placeholder, value] of Object.entries(replacements)) {
+      result = result.replace(new RegExp(placeholder, "g"), value);
+    }
+
+    // console.log(result);
+
+    return result;
+  }
+}
+
 async function openTemplate(filepath) {
   let r = await fetch(filepath).then((response) => response.text());
   return r;
@@ -805,6 +1120,37 @@ async function getArticle(
     return null;
   }
   await loadHTML(url, key, callback, type, isSmallImg, lenOfParagraph, index, ptNumber, is_show_img);
+  return;
+}
+
+async function getArticle_top5(
+  url,
+  key,
+  callback,
+  type,
+  top5_label,
+  top5_content
+) {
+  if (!url) {
+    template = template.replace(new RegExp("{{" + key + "}}", "g"), "");
+    return null;
+  }
+  await loadHTML_top5(url, key, callback, type, top5_label, top5_content);
+  return;
+}
+
+async function getArticle_opinion(
+  url,
+  key,
+  callback,
+  type,
+  opinion_content
+) {
+  if (!url) {
+    template = template.replace(new RegExp("{{" + key + "}}", "g"), "");
+    return null;
+  }
+  await loadHTML_opinion(url, key, callback, type, opinion_content);
   return;
 }
 
@@ -976,6 +1322,248 @@ async function loadHTML(
   }
 }
 
+async function loadHTML_top5(
+  url,
+  key,
+  renderFunction,
+  type,
+  top5_label,
+  top5_content
+) {
+  try {
+    let cleanUrl = new URL(url).pathname;
+    let id = cleanUrl.trim().match(/\d+$/)[0];
+
+    const data = await fetch(
+      "https://api.theepochtimes.com/epoch/eet/v1/get_single_post_go?id=" + id
+    ).then((response) => response.json());
+
+    var newTitle = customizedTitle(key);
+
+    var title = newTitle ? newTitle : data.title;
+    var authorImage = "";
+    var authorUrl = "";
+    var categories = "";
+    var alt = "";
+
+    alt = getAlt(key);
+
+    // var utmContent = key;
+    //  function updateUTM(utm, listOfArticles) {
+    //     // Check if the utm value exists as a key in listOfArticles
+    //     if (listOfArticles.hasOwnProperty(utm)) {
+    //         // If so, update utm to the value associated with that key
+    //         utm = listOfArticles[utm];
+    //     }
+    //     // Return the possibly updated utm value
+    //     return utm;
+    // }
+
+    // utmContent=updateUTM(utmContent, listOfArticles)
+
+    if (data.author[0].avatar_url) authorImage = data.author[0].avatar_url;
+    // console.log("author url", authorImage)
+    if (data.author[0].page_link) authorUrl = data.author[0].page_link;
+    categories = data.categories?.[0]?.name ?? "";
+
+    // if(data.categories[0].name && type==="article") categories = data.categories[0].name;
+
+    let myTags = "";
+
+    // if (typeof categories !== 'undefined' && categories !== null && categories.length > 0) {
+    //     myTags = categories.slice(0, 4).map(category => category.name).join(" • ");
+    // }
+    // console.log("myTags is ",myTags);
+    var img = data.thumbnail;
+    var userStatus = includingPromo ? (userType == "cancel" ? "reactive" : userType) : "paid";
+    // var abTesting= includingPromo?"_BH2":"_new"
+
+    // var trackingName = (newsletter==="sevenDays")?"sevenDays":"epochTV_"
+    var trackingName = listOfUtms[newsletter];
+    if (data.featured_image_caption) {
+      var image_caption = data.featured_image_caption;
+      image_caption = getWordsInsideParentheses(image_caption);
+    }
+
+    var utm = "utm_source=" + trackingName + userStatus;
+    // if(newsletter==="morningbrief"||newsletter==="weekendbrief"){
+
+    //    utm = utm + abTesting
+    // }
+
+    // ... your existing code ...
+
+    if (newsletter === "epochTV")
+      var authorElement = await makeAuthor(url, key);
+    // var authorElement = await makeAuthor(url, key);
+    var author = authorElement ? authorElement : data.author[0].name;
+    if (author === "Documentaries") author = "Documentary";
+    var authorTitle = data.author[0].title;
+
+    // if (isOnlyGetArticcle) {
+    //   return {
+    //     url,
+    //     img,
+    //     title,
+    //     author,
+    //     first_three_word,
+    //     utm,
+    //     categories,
+    //     // myTags,
+    //     trackingName,
+    //     authorImage,
+    //     image_caption,
+    //     authorUrl,
+    //     alt,
+    //   };
+    // }
+
+    renderFunction(
+      key,
+      {
+        url,
+        img,
+        title,
+        author,
+        utm,
+        categories,
+        // myTags,
+        trackingName,
+        authorImage,
+        image_caption,
+        authorUrl,
+        authorTitle,
+        alt,
+        top5_label,
+        top5_content
+      },
+      type
+    );
+  } catch (error) {
+    console.error("Error fetching or rendering data:", error);
+  }
+}
+
+async function loadHTML_opinion(
+  url,
+  key,
+  renderFunction,
+  type,
+  opinion_content
+) {
+  try {
+    let cleanUrl = new URL(url).pathname;
+    let id = cleanUrl.trim().match(/\d+$/)[0];
+
+    const data = await fetch(
+      "https://api.theepochtimes.com/epoch/eet/v1/get_single_post_go?id=" + id
+    ).then((response) => response.json());
+
+    var newTitle = customizedTitle(key);
+
+    var title = newTitle ? newTitle : data.title;
+    var authorImage = "";
+    var authorUrl = "";
+    var categories = "";
+    var alt = "";
+
+    alt = getAlt(key);
+
+    // var utmContent = key;
+    //  function updateUTM(utm, listOfArticles) {
+    //     // Check if the utm value exists as a key in listOfArticles
+    //     if (listOfArticles.hasOwnProperty(utm)) {
+    //         // If so, update utm to the value associated with that key
+    //         utm = listOfArticles[utm];
+    //     }
+    //     // Return the possibly updated utm value
+    //     return utm;
+    // }
+
+    // utmContent=updateUTM(utmContent, listOfArticles)
+
+    if (data.author[0].avatar_url) authorImage = data.author[0].avatar_url;
+    // console.log("author url", authorImage)
+    if (data.author[0].page_link) authorUrl = data.author[0].page_link;
+    categories = data.categories?.[0]?.name ?? "";
+
+    // if(data.categories[0].name && type==="article") categories = data.categories[0].name;
+
+    let myTags = "";
+
+    // if (typeof categories !== 'undefined' && categories !== null && categories.length > 0) {
+    //     myTags = categories.slice(0, 4).map(category => category.name).join(" • ");
+    // }
+    // console.log("myTags is ",myTags);
+    var img = data.thumbnail;
+    var userStatus = includingPromo ? (userType == "cancel" ? "reactive" : userType) : "paid";
+    // var abTesting= includingPromo?"_BH2":"_new"
+
+    // var trackingName = (newsletter==="sevenDays")?"sevenDays":"epochTV_"
+    var trackingName = listOfUtms[newsletter];
+    if (data.featured_image_caption) {
+      var image_caption = data.featured_image_caption;
+      image_caption = getWordsInsideParentheses(image_caption);
+    }
+
+    var utm = "utm_source=" + trackingName + userStatus;
+    // if(newsletter==="morningbrief"||newsletter==="weekendbrief"){
+
+    //    utm = utm + abTesting
+    // }
+
+    // ... your existing code ...
+
+    if (newsletter === "epochTV")
+      var authorElement = await makeAuthor(url, key);
+    // var authorElement = await makeAuthor(url, key);
+    var author = authorElement ? authorElement : data.author[0].name;
+    if (author === "Documentaries") author = "Documentary";
+    var authorTitle = data.author[0].title;
+
+    // if (isOnlyGetArticcle) {
+    //   return {
+    //     url,
+    //     img,
+    //     title,
+    //     author,
+    //     first_three_word,
+    //     utm,
+    //     categories,
+    //     // myTags,
+    //     trackingName,
+    //     authorImage,
+    //     image_caption,
+    //     authorUrl,
+    //     alt,
+    //   };
+    // }
+
+    renderFunction(
+      key,
+      {
+        url,
+        img,
+        title,
+        author,
+        utm,
+        categories,
+        // myTags,
+        trackingName,
+        authorImage,
+        image_caption,
+        authorUrl,
+        authorTitle,
+        alt,
+        opinion_content
+      },
+      type
+    );
+  } catch (error) {
+    console.error("Error fetching or rendering data:", error);
+  }
+}
+
 function getFirstThreeParagraphs(doc, len = 3, shortCode = []) {
   const paragraphs = doc.querySelectorAll("p");
 
@@ -1096,6 +1684,29 @@ function getFirstThreeParagraphs(doc, len = 3, shortCode = []) {
 
     }
   }
+
+  return firstThreeParagraphs.join("");
+}
+
+function getOpinionParagraphs(content) {
+  let firstThreeParagraphs = [];
+  content.split("\n").forEach((paragraph) => {
+    if (paragraph.trim() !== "") {
+      firstThreeParagraphs.push(
+        `<p style="font-family: Georgia;
+font-size: 17px;
+font-style: normal;
+font-weight: 400;
+line-height: 25.2px;
+color: #000;
+margin-top: 5px;
+mso-line-height-alt: 1.6;
+margin-bottom: 10px;" class="article_paragraph">` +
+        paragraph +
+        "</p>"
+      );
+    }
+  });
 
   return firstThreeParagraphs.join("");
 }
@@ -1254,7 +1865,7 @@ function getAlt(key) {
 }
 
 function customizedTitle(key) {
-  if (newsletter == "focus") {
+  if (newsletter == "focus" || newsletter == "top5" || newsletter == "opinion") {
     const new_title = document.getElementById(`${key}-title`);
     return new_title.value;
   } else {
